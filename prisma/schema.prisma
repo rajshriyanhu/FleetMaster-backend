@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URI")
+}
+
+model User {
+  id            String              @id @default(uuid())
+  name          String
+  email         String           @unique
+  password      String
+  role          Role             @default(USER)
+  permissions   Json            // JSON field to store package access levels
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model Vehicle {
+  id                   String    @id @default(uuid())
+  asset_no             Int
+  region               String
+  state                String
+  city                 String
+  registration_no      String    @unique
+  make                 String
+  model                String
+  variant              String
+  transmission_type    String
+  fuel_type            String
+  capacity             Int
+  km_run               Float
+  color                String
+  chassis_no           String    @unique
+  engine_no            String    @unique
+  manufacturing_date   DateTime
+  registration_date    DateTime
+  rc_url               String
+  insurance_validity   DateTime
+  insurance_url        String
+  puc_validity         DateTime
+  puc_url              String
+  fitness_validity     DateTime
+  fitness_url          String
+  last_battery_change  DateTime? 
+  last_service         DateTime
+  last_service_kms     Float
+  next_service_due     DateTime
+  next_service_due_kms Float
+  gps_renewal_due      DateTime
+  trip                 Trip[]
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  deleted              Boolean   @default(false)
+}
+
+model Trip {
+  id                 String     @id @default(uuid())
+  trip_type          String
+  vehicle_id         String
+  driver_id          String
+  customer_name      String
+  customer_number    String
+  start_date         DateTime
+  end_date           DateTime
+  days               Int
+  start_location     String
+  end_location       String
+  location_visited   String
+  start_km           Float
+  end_km             Float
+  total_km           Float
+  total_fuel_cost    Float
+  average_fuel_cost  Float
+  vehicle_average    Float
+  state_tax          Float
+  toll_tax           Float
+  permit             Float
+  maintainance       Float
+  profit             Float
+  driver             Driver     @relation(fields: [driver_id], references: [id])
+  vehicle            Vehicle     @relation(fields: [vehicle_id], references: [id])
+  created_at         DateTime   @default(now())
+  updated_at         DateTime   @updatedAt
+  deleted            Boolean    @default(false)
+}
+
+model Customer {
+  id           String   @id @default(uuid())
+  prefix       String
+  name         String
+  email        String
+  phone_number String   @unique
+  address      Address? @relation(fields: [address_id], references: [id])
+  address_id   String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  deleted      Boolean  @default(false)
+}
+
+model Driver {
+  id                  String    @id @default(uuid())
+  name                String
+  email               String
+  phone_number        String       @unique
+  alt_phone_number    String
+  emg_name            String
+  emg_relation        String
+  emg_phone_number    String
+  insurance_valid_upto DateTime
+  joining_date        DateTime
+  exit_date           DateTime?
+  employment_status   String
+  address             Address   @relation(fields: [address_id], references: [id])
+  dl_number           String
+  experience          Int
+  expertise           String
+  working_region      String
+  working_state       String
+  working_city        String
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  deleted             Boolean   @default(false)
+  address_id          String
+  Trip                Trip[]
+}
+
+model Address {
+  id          String     @id @default(uuid())
+  street      String
+  city        String
+  state       String
+  postal_code Int
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  deleted     Boolean    @default(false)
+  Customer    Customer[]
+  Driver      Driver[]
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  vehicle_id  String
+  chassis_no  String
+  amount      Float
+  type        String
+  date        DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  deleted     Boolean  @default(false)
+}
+
+enum Role {
+  ADMIN
+  USER
+}
