@@ -67,15 +67,53 @@ export const getAllDriver = async (
   res: Response,
   next: NextFunction
 ) => {
-  const drivers = await prismaClient.driver.findMany({
-    where: {
-      deleted: false,
-    },
-    include: {
-      address: true,
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+  const searchQuery = (req.query.search as string) || "";
+  const sortBy = (req.query.sortBy as string) || "name";
+
+  const [drivers, total] = await Promise.all([
+    prismaClient.driver.findMany({
+      where: {
+        deleted: false,
+        OR: [
+          { name: { contains: searchQuery, mode: "insensitive" } },
+          { email: { contains: searchQuery, mode: "insensitive" } },
+        ],
+      },
+      include: {
+        address: true,
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        [sortBy]: "asc",
+      },
+    }),
+    prismaClient.driver.count({
+      where: {
+        deleted: false,
+        OR: [
+          { name: { contains: searchQuery, mode: "insensitive" } },
+          { email: { contains: searchQuery, mode: "insensitive" } },
+        ],
+      },
+    }),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: drivers,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1,
     },
   });
-  res.status(200).json({ success: true, drivers: drivers });
 };
 
 export const getDriver = async (
