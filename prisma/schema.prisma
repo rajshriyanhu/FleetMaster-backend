@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id            String              @id @default(uuid())
-  name          String
-  email         String           @unique
-  password      String
-  role          Role             @default(USER)
-  permissions   Json            // JSON field to store package access levels
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(USER)
+  permissions Json // JSON field to store package access levels
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Vehicle {
@@ -44,7 +44,7 @@ model Vehicle {
   puc_url              String
   fitness_validity     DateTime
   fitness_url          String
-  last_battery_change  DateTime? 
+  last_battery_change  DateTime?
   last_service         DateTime
   last_service_kms     Float
   next_service_due     DateTime
@@ -57,34 +57,34 @@ model Vehicle {
 }
 
 model Trip {
-  id                 String     @id @default(uuid())
-  trip_type          String
-  vehicle_id         String
-  driver_id          String
-  customer_name      String
-  customer_number    String
-  start_date         DateTime
-  end_date           DateTime
-  days               Int
-  start_location     String
-  end_location       String
-  location_visited   String
-  start_km           Float
-  end_km             Float
-  total_km           Float
-  total_fuel_cost    Float
-  average_fuel_cost  Float
-  vehicle_average    Float
-  state_tax          Float
-  toll_tax           Float
-  permit             Float
-  maintainance       Float
-  profit             Float
-  driver             Driver     @relation(fields: [driver_id], references: [id])
-  vehicle            Vehicle     @relation(fields: [vehicle_id], references: [id])
-  created_at         DateTime   @default(now())
-  updated_at         DateTime   @updatedAt
-  deleted            Boolean    @default(false)
+  id                String   @id @default(uuid())
+  trip_type         String
+  vehicle_id        String
+  driver_id         String
+  customer_id       String
+  start_date        DateTime
+  end_date          DateTime
+  days              Int
+  start_location    String
+  end_location      String
+  location_visited  String
+  start_km          Float
+  end_km            Float
+  total_km          Float
+  total_fuel_cost   Float
+  average_fuel_cost Float
+  vehicle_average   Float
+  state_tax         Float
+  toll_tax          Float
+  permit            Float
+  maintainance      Float
+  profit            Float
+  driver            Driver   @relation(fields: [driver_id], references: [id])
+  vehicle           Vehicle  @relation(fields: [vehicle_id], references: [id])
+  customer          Customer @relation(fields: [customer_id], references: [id])
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  deleted           Boolean  @default(false)
 }
 
 model Customer {
@@ -98,33 +98,35 @@ model Customer {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   deleted      Boolean  @default(false)
+
+  Trip Trip[]
 }
 
 model Driver {
-  id                  String    @id @default(uuid())
-  name                String
-  email               String
-  phone_number        String       @unique
-  alt_phone_number    String
-  emg_name            String
-  emg_relation        String
-  emg_phone_number    String
+  id                   String    @id @default(uuid())
+  name                 String
+  email                String
+  phone_number         String    @unique
+  alt_phone_number     String
+  emg_name             String
+  emg_relation         String
+  emg_phone_number     String
   insurance_valid_upto DateTime
-  joining_date        DateTime
-  exit_date           DateTime?
-  employment_status   String
-  address             Address   @relation(fields: [address_id], references: [id])
-  dl_number           String
-  experience          Int
-  expertise           String
-  working_region      String
-  working_state       String
-  working_city        String
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
-  deleted             Boolean   @default(false)
-  address_id          String
-  Trip                Trip[]
+  joining_date         DateTime
+  exit_date            DateTime?
+  employment_status    String
+  address              Address   @relation(fields: [address_id], references: [id])
+  dl_number            String
+  experience           Int
+  expertise            String
+  working_region       String
+  working_state        String
+  working_city         String
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  deleted              Boolean   @default(false)
+  address_id           String
+  Trip                 Trip[]
 }
 
 model Address {
@@ -142,7 +144,7 @@ model Address {
 
 model Expense {
   id          String   @id @default(uuid())
-  name        String
+  file_url    String
   description String
   vehicle_id  String
   chassis_no  String
