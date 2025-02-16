@@ -91,7 +91,7 @@ model Customer {
   id           String   @id @default(uuid())
   prefix       String
   name         String
-  email        String
+  email        String   @unique
   phone_number String   @unique
   address      Address? @relation(fields: [address_id], references: [id])
   address_id   String?

@@ -27,16 +27,60 @@ export const getAllTrips = async (
   res: Response,
   next: NextFunction
 ) => {
-  const trips = await prismaClient.trip.findMany({
-    where: {
-      deleted: false,
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+  const searchQuery = (req.query.search as string) || "";
+  const sortBy = (req.query.sortBy as string) || "profit";
+
+  const [trips, total] = await Promise.all([
+    prismaClient.trip.findMany({
+      where: {
+        deleted: false,
+        OR: [
+          { start_location: { contains: searchQuery, mode: "insensitive" } },
+          { end_location: { contains: searchQuery, mode: "insensitive" } },
+          { driver : {
+            name: { contains: searchQuery, mode: "insensitive" }
+          }}
+        ],
+      },
+      include :{
+        driver: true,
+        // customer: true,
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        [sortBy]: "asc",
+      },
+    }),
+    prismaClient.trip.count({
+      where: {
+        deleted: false,
+        OR: [
+          { start_location: { contains: searchQuery, mode: "insensitive" } },
+          { end_location: { contains: searchQuery, mode: "insensitive" } },
+          { driver : {
+            name: { contains: searchQuery, mode: "insensitive" }
+          }}
+        ],
+      },
+    }),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: trips,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1,
     },
-    include: {
-      vehicle : true,
-      driver : true,
-    }
   });
-  res.status(200).json({ success: true, trips: trips });
 };
 
 export const getTrip = async (
