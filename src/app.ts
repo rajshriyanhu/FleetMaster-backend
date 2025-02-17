@@ -5,6 +5,7 @@ import { errorMiddleware } from './middlewares/errors';
 import { BASE_API_PATH } from './constants';
 import rootRouter from './routes/index';
 import path from 'path';
+import { limiter } from './utils/rate-limiter';
 
 
 const app = express();
@@ -26,6 +27,8 @@ app.use(express.urlencoded({extended: true, limit: '16kb'}))
 // app.use(express.static("public"))
 
 app.use(cookieParser())
+
+app.use(limiter); 
 
 app.use(BASE_API_PATH, rootRouter)
 
