@@ -122,6 +122,7 @@ model Driver {
   working_region       String
   working_state        String
   working_city         String
+  document_url         String
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
   deleted              Boolean   @default(false)
