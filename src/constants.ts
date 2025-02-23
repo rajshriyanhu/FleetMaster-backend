@@ -11,4 +11,5 @@ export const BASE_CUSTOMER_PATH = '/customer';
 export const BASE_DRIVER_PATH = '/driver';
 export const BASE_FILE_PATH = '/file';
 export const BASE_FORM_PATH = '/form';
+export const BASE_DASHBOARD_PATH = '/dashboard';
 // export const API_DOCS_PATH = '/v3/api-docs'

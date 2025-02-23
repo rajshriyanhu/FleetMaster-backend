@@ -47,7 +47,7 @@ export const getAllTrips = async (
       },
       include :{
         driver: true,
-        // customer: true,
+        customer: true,
       },
       skip,
       take: limit,
@@ -94,6 +94,7 @@ export const getTrip = async (
     include: {
       vehicle : true,
       driver : true,
+      customer: true,
     }
   });
 
