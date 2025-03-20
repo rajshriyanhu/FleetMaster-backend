@@ -40,12 +40,14 @@ export const getAllTrips = async (
         OR: [
           { start_location: { contains: searchQuery, mode: "insensitive" } },
           { end_location: { contains: searchQuery, mode: "insensitive" } },
-          { driver : {
-            name: { contains: searchQuery, mode: "insensitive" }
-          }}
+          {
+            driver: {
+              name: { contains: searchQuery, mode: "insensitive" },
+            },
+          },
         ],
       },
-      include :{
+      include: {
         driver: true,
         customer: true,
       },
@@ -61,9 +63,11 @@ export const getAllTrips = async (
         OR: [
           { start_location: { contains: searchQuery, mode: "insensitive" } },
           { end_location: { contains: searchQuery, mode: "insensitive" } },
-          { driver : {
-            name: { contains: searchQuery, mode: "insensitive" }
-          }}
+          {
+            driver: {
+              name: { contains: searchQuery, mode: "insensitive" },
+            },
+          },
         ],
       },
     }),
@@ -92,16 +96,14 @@ export const getTrip = async (
   const trip = await prismaClient.trip.findFirst({
     where: { id: tripId },
     include: {
-      vehicle : true,
-      driver : true,
+      vehicle: true,
+      driver: true,
       customer: true,
-    }
+    },
   });
 
   if (!trip) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Trip not found" });
+    return res.status(404).json({ success: false, message: "Trip not found" });
   }
   if (trip.deleted) {
     return res
@@ -122,9 +124,7 @@ export const updateTrip = async (
   });
 
   if (!trip) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Trip not found" });
+    return res.status(404).json({ success: false, message: "Trip not found" });
   }
   if (trip.deleted) {
     return res
@@ -150,9 +150,7 @@ export const deleteTrip = async (
   });
 
   if (!trip) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Trip not found" });
+    return res.status(404).json({ success: false, message: "Trip not found" });
   }
   if (trip.deleted) {
     return res
@@ -165,4 +163,3 @@ export const deleteTrip = async (
   });
   res.status(200).json({ success: true, trip: trip });
 };
-

@@ -46,7 +46,7 @@ model Vehicle {
   fitness_url          String
   last_battery_change  DateTime?
   last_service         DateTime
-  last_service_kms     Float
+  last_service_kms     Float?
   next_service_due     DateTime
   next_service_due_kms Float
   gps_renewal_due      DateTime

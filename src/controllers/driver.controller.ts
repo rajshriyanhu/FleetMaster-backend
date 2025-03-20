@@ -82,6 +82,7 @@ export const getAllDriver = async (
         OR: [
           { name: { contains: searchQuery, mode: "insensitive" } },
           { email: { contains: searchQuery, mode: "insensitive" } },
+          { phone_number: { contains: searchQuery, mode: "insensitive" } },
         ],
       },
       include: {
@@ -99,6 +100,7 @@ export const getAllDriver = async (
         OR: [
           { name: { contains: searchQuery, mode: "insensitive" } },
           { email: { contains: searchQuery, mode: "insensitive" } },
+          { phone_number: { contains: searchQuery, mode: "insensitive" } },
         ],
       },
     }),
