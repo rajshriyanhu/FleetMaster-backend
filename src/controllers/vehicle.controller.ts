@@ -17,12 +17,44 @@ export const getAllVehicles = async (
   res: Response,
   next: NextFunction
 ) => {
-  const vehicles = await prismaClient.vehicle.findMany({
-    where: {
-      deleted: false
-    }
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+  const searchQuery = (req.query.search as string) || "";
+
+  const [vehicles, total] = await Promise.all([
+    prismaClient.vehicle.findMany({
+      where: {
+        deleted: false,
+        OR: [
+          { registration_no: { contains: searchQuery, mode: "insensitive" } },
+        ],
+      },
+      skip,
+      take: limit,
+    }),
+    prismaClient.vehicle.count({
+      where: {
+        deleted: false,
+        OR: [
+          { registration_no: { contains: searchQuery, mode: "insensitive" } },
+        ],
+      },
+    }),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: vehicles,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1,
+    },
   });
-  res.status(200).json({ success: true, vehicles: vehicles });
 };
 
 export const getVehicle = async (
