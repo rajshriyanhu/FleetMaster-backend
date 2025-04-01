@@ -100,6 +100,9 @@ export const getCustomer = async (
   const customerId = req.params.id;
   const customer = await prismaClient.customer.findFirst({
     where: { id: customerId },
+    include: {
+      address: true,
+    }
   });
 
   if (!customer) {
@@ -128,7 +131,6 @@ export const updateCustomer = async (
     street,
     city,
     state,
-    country,
     postal_code,
   } = req.body;
   const customer = await prismaClient.customer.findFirst({
