@@ -1,9 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import prismaClient from "../db/db.config";
-import { Resend } from "resend";
 import { sendEmail } from "../utils/mailer";
-
-const resend = new Resend(`${process.env.RESEND_API_KEY}`);
 
 export const inviteUser = async (
   req: Request,
