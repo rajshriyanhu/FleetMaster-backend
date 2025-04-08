@@ -9,7 +9,7 @@ const tripRoutes:Router = Router()
 tripRoutes.post('/create', authMiddleware, checkAccess('trip', 'write'), errorHandler(createtrip))
 tripRoutes.get('/' , authMiddleware, checkAccess('trip', 'read'), errorHandler(getAllTrips))
 tripRoutes.get('/:id' , authMiddleware, checkAccess('trip', 'read'), errorHandler(getTrip))
-tripRoutes.put('/:id', authMiddleware, errorHandler(updateTrip))
-tripRoutes.delete('/:id', authMiddleware, errorHandler(deleteTrip))
+tripRoutes.put('/:id', authMiddleware, checkAccess('trip', 'update'), errorHandler(updateTrip))
+tripRoutes.delete('/:id', authMiddleware, checkAccess('trip', 'delete'), errorHandler(deleteTrip))
 
 export default tripRoutes

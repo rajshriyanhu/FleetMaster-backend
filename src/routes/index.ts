@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { BASE_AUTH_PATH, BASE_CUSTOMER_PATH, BASE_DASHBOARD_PATH, BASE_DRIVER_PATH, BASE_EXPENSE_PATH, BASE_FILE_PATH, BASE_FORM_PATH, BASE_TRIP_PATH, BASE_VEHICLE_PATH } from "../constants";
+import { BASE_AUTH_PATH, BASE_CUSTOMER_PATH, BASE_DASHBOARD_PATH, BASE_DRIVER_PATH, BASE_EXPENSE_PATH, BASE_FILE_PATH, BASE_FORM_PATH, BASE_INVITE_PATH, BASE_TRIP_PATH, BASE_VEHICLE_PATH } from "../constants";
 import vehicleRoutes from '../routes/vehicle.route'
 import tripRoutes from "./trip.route";
 import expenseRoutes from "./expense.route";
@@ -9,6 +9,7 @@ import fileRoutes from "./file.route";
 import authRoutes from "./auth.route";
 import formRoutes from "./form.route";
 import dashboardRoutes from "./dashboard.route";
+import inviteRoutes from "./invite.route";
 
 const rootRouter : Router = Router();
 
@@ -21,6 +22,6 @@ rootRouter.use(BASE_DRIVER_PATH, driverRoutes)
 rootRouter.use(BASE_FILE_PATH, fileRoutes)
 rootRouter.use(BASE_FORM_PATH, formRoutes)
 rootRouter.use(BASE_DASHBOARD_PATH, dashboardRoutes)
-
+rootRouter.use(BASE_INVITE_PATH, inviteRoutes)
 
 export default rootRouter;

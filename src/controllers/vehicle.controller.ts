@@ -27,7 +27,7 @@ export const getAllVehicles = async (
       where: {
         deleted: false,
         OR: [
-          { registration_no: { contains: searchQuery, mode: "insensitive" } },
+          { registration_no: { contains: searchQuery } },
         ],
       },
       skip,
@@ -37,7 +37,7 @@ export const getAllVehicles = async (
       where: {
         deleted: false,
         OR: [
-          { registration_no: { contains: searchQuery, mode: "insensitive" } },
+          { registration_no: { contains: searchQuery } },
         ],
       },
     }),

@@ -38,11 +38,11 @@ export const getAllTrips = async (
       where: {
         deleted: false,
         OR: [
-          { start_location: { contains: searchQuery, mode: "insensitive" } },
-          { end_location: { contains: searchQuery, mode: "insensitive" } },
+          { start_location: { contains: searchQuery } },
+          { end_location: { contains: searchQuery } },
           {
             driver: {
-              name: { contains: searchQuery, mode: "insensitive" },
+              name: { contains: searchQuery },
             },
           },
         ],
@@ -61,11 +61,11 @@ export const getAllTrips = async (
       where: {
         deleted: false,
         OR: [
-          { start_location: { contains: searchQuery, mode: "insensitive" } },
-          { end_location: { contains: searchQuery, mode: "insensitive" } },
+          { start_location: { contains: searchQuery} },
+          { end_location: { contains: searchQuery} },
           {
             driver: {
-              name: { contains: searchQuery, mode: "insensitive" },
+              name: { contains: searchQuery },
             },
           },
         ],

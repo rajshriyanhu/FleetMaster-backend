@@ -3,9 +3,7 @@ import dotenv from 'dotenv';
 import { app } from './app';
 import { addCustomerAndDriver, addInitialVehicles, addTrips, initializeAdminUser } from './utils/fill-db';
 
-dotenv.config({
-    path: './env'
-})
+dotenv.config({})
 
 const startServer = async () => {
     try {
@@ -18,6 +16,7 @@ const startServer = async () => {
         process.exit(1); 
     }
 };
+
 
 // addInitialVehicles();
 // addCustomerAndDriver();

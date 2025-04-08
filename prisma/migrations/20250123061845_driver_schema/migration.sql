@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "Driver" ALTER COLUMN "alt_phone_number" SET DATA TYPE BIGINT,
-ALTER COLUMN "emg_phone_number" SET DATA TYPE BIGINT,
-ALTER COLUMN "phone_number" SET DATA TYPE BIGINT;

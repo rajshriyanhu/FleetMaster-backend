@@ -80,9 +80,9 @@ export const getAllDriver = async (
       where: {
         deleted: false,
         OR: [
-          { name: { contains: searchQuery, mode: "insensitive" } },
-          { email: { contains: searchQuery, mode: "insensitive" } },
-          { phone_number: { contains: searchQuery, mode: "insensitive" } },
+          { name: { contains: searchQuery } },
+          { email: { contains: searchQuery} },
+          { phone_number: { contains: searchQuery } },
         ],
       },
       include: {
@@ -98,9 +98,9 @@ export const getAllDriver = async (
       where: {
         deleted: false,
         OR: [
-          { name: { contains: searchQuery, mode: "insensitive" } },
-          { email: { contains: searchQuery, mode: "insensitive" } },
-          { phone_number: { contains: searchQuery, mode: "insensitive" } },
+          { name: { contains: searchQuery } },
+          { email: { contains: searchQuery } },
+          { phone_number: { contains: searchQuery} },
         ],
       },
     }),

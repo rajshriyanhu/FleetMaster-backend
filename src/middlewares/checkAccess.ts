@@ -3,16 +3,19 @@ import prismaClient from "../db/db.config";
 import { NotFoundException } from "../exceptions/not-found";
 import { ErrorCode } from "../exceptions/root.exception";
 
-type Action = "read" | "write";
+type Resource = 'vehicle' | 'trip' | 'driver' | 'customer' | 'user' | 'expense';
+type Action = 'read' | 'write' | 'update' | 'delete';
 
 type Permission = {
     [keyof: string]: {
       read: boolean;
       write: boolean;
+      update: boolean;
+      delete: boolean;
     };
   };
 
-export const checkAccess = (packageName: string, action: Action) => {
+export const checkAccess = (packageName: Resource, action: Action) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             let user = await prismaClient.user.findFirst({ where: { id: req.userId } });
@@ -25,7 +28,6 @@ export const checkAccess = (packageName: string, action: Action) => {
         if(user.role === 'ADMIN'){
             return next();
         }
-        console.log('why here')
         const permissions: Permission = user.permissions as unknown as Permission;
 
         if (!permissions || !permissions[packageName]?.[action]) {

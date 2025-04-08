@@ -9,8 +9,8 @@ const vehicleRoutes:Router = Router()
 vehicleRoutes.post('/create', authMiddleware, checkAccess("vehicle", "write"), errorHandler(createVehicleEntry))
 vehicleRoutes.get('/', authMiddleware, checkAccess('vehicle', 'read'), errorHandler(getAllVehicles))
 vehicleRoutes.get('/:id', authMiddleware, checkAccess("vehicle", "read"), errorHandler(getVehicle))
-vehicleRoutes.put('/:id', authMiddleware, errorHandler(updateVehicle))
-vehicleRoutes.delete('/:id', authMiddleware, errorHandler(deleteVehicle))
+vehicleRoutes.put('/:id', authMiddleware, checkAccess("vehicle", "update"), errorHandler(updateVehicle))
+vehicleRoutes.delete('/:id', authMiddleware, checkAccess("vehicle", "delete"), errorHandler(deleteVehicle))
 
 
 export default vehicleRoutes
