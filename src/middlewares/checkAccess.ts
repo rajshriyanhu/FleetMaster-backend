@@ -19,7 +19,6 @@ export const checkAccess = (packageName: Resource, action: Action) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             let user = await prismaClient.user.findFirst({ where: { id: req.userId } });
-            console.log(user)
         if (!user) {
             return next(
                 new NotFoundException("User not found", ErrorCode.NOT_FOUND)

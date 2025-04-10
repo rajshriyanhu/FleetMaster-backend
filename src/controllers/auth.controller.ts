@@ -5,6 +5,8 @@ import { BadRequestException } from "../exceptions/bad-request";
 import { ErrorCode } from "../exceptions/root.exception";
 import { NotFoundException } from "../exceptions/not-found";
 import { UnauthorizedException } from "../exceptions/unauthorized";
+import { sendEmail } from "../utils/mailer";
+import * as bcrypt from "bcrypt";
 
 export const adminSignUp = async (
   req: Request,
@@ -12,11 +14,12 @@ export const adminSignUp = async (
   next: NextFunction
 ) => {
   const { name, email, password, secret } = req.body;
+
   let existingUser = await prismaClient.user.findFirst({
     where: { email: email },
   });
 
-  if(secret !== process.env.ADMIN_USER_SECRET){
+  if (secret !== process.env.ADMIN_USER_SECRET) {
     return res.status(409).json({ message: "Invalid secret" });
   }
 
@@ -24,10 +27,13 @@ export const adminSignUp = async (
     return res.status(409).json({ message: "User already exists" });
   }
 
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
   const tenant = await prismaClient.tenant.create({
     data: {
-      admin_name : name,
-      admin_email : email,
+      admin_name: name,
+      admin_email: email,
     },
   });
 
@@ -37,7 +43,7 @@ export const adminSignUp = async (
     data: {
       email,
       name,
-      password,
+      password : hashedPassword,
       role: "ADMIN",
       permissions: permissions,
       tenant_id: tenant.id,
@@ -50,7 +56,7 @@ export const adminSignUp = async (
       tenantId: tenant.id,
     },
     process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: '7d' }
+    { expiresIn: "7d" }
   );
 
   res.cookie("accessToken", accessToken, {
@@ -68,7 +74,7 @@ export const adminSignUp = async (
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   });
-}
+};
 
 export const signUp = async (
   req: Request,
@@ -89,7 +95,7 @@ export const signUp = async (
     },
   });
 
-  if(!invite){
+  if (!invite) {
     return res.status(409).json({ message: "Invalid invite" });
   }
 
@@ -97,13 +103,16 @@ export const signUp = async (
     return res.status(409).json({ message: "Invalid invite code" });
   }
 
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
   const permissions = getPermissions(invite.role);
 
   const user = await prismaClient.user.create({
     data: {
       email,
       name,
-      password,
+      password : hashedPassword,
       role: invite.role,
       permissions: permissions,
       tenant_id: invite.tenant_id,
@@ -115,7 +124,7 @@ export const signUp = async (
       tenantId: invite.tenant_id,
     },
     process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: '7d' }
+    { expiresIn: "7d" }
   );
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -143,7 +152,9 @@ export const login = async (
   if (!user) {
     return next(new NotFoundException("User not found", ErrorCode.NOT_FOUND));
   }
-  if (password !== user.password) {
+
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  if (!isValidPassword) {
     return next(
       new BadRequestException(
         "Invalid credentials",
@@ -151,13 +162,14 @@ export const login = async (
       )
     );
   }
+
   const accessToken = jwt.sign(
     {
       userId: user.id,
       tenantId: user.tenant_id,
     },
     process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: '7d' }
+    { expiresIn: "7d" }
   );
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -210,7 +222,7 @@ export const updateAccess = async (
     );
   }
 
-  const updatedUser = await prismaClient.user.update({
+  await prismaClient.user.update({
     where: {
       id: req.body.userId,
     },
@@ -253,10 +265,10 @@ export const allUsers = async (
   const tenantId = req.tenantId;
   const users = await prismaClient.user.findMany({
     where: {
-      tenant_id: tenantId,
-      role: {
-        in: ["VIEWER", "EDITOR"],
-      },
+      // tenant_id: tenantId,
+      // role: {
+      //   in: ["VIEWER", "EDITOR"],
+      // },
     },
     select: {
       id: true,
@@ -264,6 +276,7 @@ export const allUsers = async (
       name: true,
       role: true,
       permissions: true,
+      password: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -276,133 +289,192 @@ export const getAlltenants = async (
   res: Response,
   next: NextFunction
 ) => {
-  const tenants = await prismaClient.tenant.findMany({
-  });
+  const tenants = await prismaClient.tenant.findMany({});
   res.json(tenants);
 };
 
-const getPermissions = (role : "ADMIN" | "EDITOR" | "VIEWER")  => {
+
+export const updatePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.userId;
+  const user = await prismaClient.user.findFirst({
+    where: {
+      id: userId,
+    },
+  });
+  
+  if (!user) {
+    return next(new NotFoundException("User not found", ErrorCode.NOT_FOUND));
+  }
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+  const updatedUser = await prismaClient.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      password: hashedPassword,
+    },
+  });
+  res.status(200).json({ message: "Password updated!" });
+};
+
+export const sendCode = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { email } = req.body;
+  const user = await prismaClient.user.findFirst({
+    where: {
+      email: email,
+    },
+  });
+  if (!user) {
+    return next(new NotFoundException("User not found", ErrorCode.NOT_FOUND));
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  await sendEmail(
+    email,
+    "Reset your password - Fleet Master",
+    `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h2>Welcome to Fleet Master!</h2>
+    <p>Your verification code is: <strong>${otp}</strong></p>
+    <p>Please use this code during the password reset process.</p>
+    <p>Best regards,<br>The Fleet Master Team</p>
+  </div>`
+  );
+
+  res.status(201).json({ message: "Invite sent successfully" });
+};
+
+const getPermissions = (role: "ADMIN" | "EDITOR" | "VIEWER") => {
   let permission = {
     vehicle: {
-        read: true,
-        write: true,
-        update: false,
-        delete: false,
+      read: true,
+      write: true,
+      update: false,
+      delete: false,
     },
-    trip : {
-        read: true,
-        write: true,
-        update: false,
-        delete: false,
+    trip: {
+      read: true,
+      write: true,
+      update: false,
+      delete: false,
     },
     driver: {
-        read: true,
-        write: true,
-        update: false,
-        delete: false,
+      read: true,
+      write: true,
+      update: false,
+      delete: false,
     },
     constomer: {
-        read: true,
-        write: true,
-        update: false,
-        delete: false,
+      read: true,
+      write: true,
+      update: false,
+      delete: false,
     },
     expense: {
       read: true,
       write: true,
       update: false,
       delete: false,
-  },
-    user : {
-        read: false,
-        write: false,
-        update: false,
-        delete: false,
-    }
-}
+    },
+    user: {
+      read: false,
+      write: false,
+      update: false,
+      delete: false,
+    },
+  };
 
-  if(role === "ADMIN"){
+  if (role === "ADMIN") {
     permission = {
-        vehicle: {
-            read: true,
-            write: true,
-            update: true,
-            delete: true,
-        },
-        trip : {
-            read: true,
-            write: true,
-            update: true,
-            delete: true,
-        },
-        driver: {
-            read: true,
-            write: true,
-            update: true,
-            delete: true,
-        },
-        constomer: {
-            read: true,
-            write: true,
-            update: true,
-            delete: true,
-        },
-        expense: {
-          read: true,
-          write: true,
-          update: true,
-          delete: true,
+      vehicle: {
+        read: true,
+        write: true,
+        update: true,
+        delete: true,
       },
-        user : {
-            read: true,
-            write: true,
-            update: true,
-            delete: true,
-        }
-    }
+      trip: {
+        read: true,
+        write: true,
+        update: true,
+        delete: true,
+      },
+      driver: {
+        read: true,
+        write: true,
+        update: true,
+        delete: true,
+      },
+      constomer: {
+        read: true,
+        write: true,
+        update: true,
+        delete: true,
+      },
+      expense: {
+        read: true,
+        write: true,
+        update: true,
+        delete: true,
+      },
+      user: {
+        read: true,
+        write: true,
+        update: true,
+        delete: true,
+      },
+    };
   }
 
-  if(role === "EDITOR"){
+  if (role === "EDITOR") {
     permission = {
-        vehicle: {
-            read: true,
-            write: true,
-            update: true,
-            delete: false,
-        },
-        trip : {
-            read: true,
-            write: true,
-            update: true,
-            delete: false,
-        },
-        driver: {
-            read: true,
-            write: true,
-            update: true,
-            delete: false,
-        },
-        constomer: {
-            read: true,
-            write: true,
-            update: true,
-            delete: false,
-        },
-        expense: {
-          read: true,
-          write: true,
-          update: true,
-          delete: false,
+      vehicle: {
+        read: true,
+        write: true,
+        update: true,
+        delete: false,
       },
-        user : {
-            read: false,
-            write: false,
-            update: true,
-            delete: false,
-        }
-    }
+      trip: {
+        read: true,
+        write: true,
+        update: true,
+        delete: false,
+      },
+      driver: {
+        read: true,
+        write: true,
+        update: true,
+        delete: false,
+      },
+      constomer: {
+        read: true,
+        write: true,
+        update: true,
+        delete: false,
+      },
+      expense: {
+        read: true,
+        write: true,
+        update: true,
+        delete: false,
+      },
+      user: {
+        read: false,
+        write: false,
+        update: true,
+        delete: false,
+      },
+    };
   }
 
   return permission;
-    
-}
+};

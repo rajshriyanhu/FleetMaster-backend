@@ -11,8 +11,6 @@ export const getDashboardTrips = async (
     const oneMonthBack = subMonths(today, 1);
     const oneMonthForward = addMonths(today, 1);
 
-    console.log("tenantId", req.tenantId);
-
     const trips = await prismaClient.trip.findMany({
       where: {
         tenant_id: req.tenantId,

@@ -21,7 +21,6 @@ export const getAllVehicles = async (
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
   const searchQuery = (req.query.search as string) || "";
-  console.log("tenantId : ",req.tenantId)
   const [vehicles, total] = await Promise.all([
     prismaClient.vehicle.findMany({
       where: {
