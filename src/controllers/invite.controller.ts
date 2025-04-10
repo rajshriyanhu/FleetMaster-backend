@@ -29,7 +29,7 @@ export const inviteUser = async (
             <p>Your registration code is: <strong>${otp}</strong></p>
             <p>Please use this code during the registration process.</p>
             <p>Click the link below to complete your registration:</p>
-            <a href="http://localhost:3000/sign-up?inviteId=${invite.id}&email=${email}&name=${name}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 15px 0;">Register Now</a>
+            <a href="http://34.56.78.48:3000/sign-up?inviteId=${invite.id}&email=${email}&name=${name}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 15px 0;">Register Now</a>
             <p>This invitation link will expire in 24 hours.</p>
             <p>If you have any questions, please contact your administrator.</p>
             <p>Best regards,<br>The Fleet Master Team</p>
