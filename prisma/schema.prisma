@@ -7,6 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Tenant {
+  id          String   @id @default(uuid())
+  admin_name  String
+  admin_email String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model User {
   id          String   @id @default(uuid())
   name        String
@@ -14,6 +22,7 @@ model User {
   password    String
   role        Role     @default(VIEWER)
   permissions Json // JSON field to store package access levels
+  tenant_id   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -51,6 +60,7 @@ model Vehicle {
   next_service_due_kms Float
   gps_renewal_due      DateTime
   trip                 Trip[]
+  tenant_id            String
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
   deleted              Boolean   @default(false)
@@ -82,6 +92,7 @@ model Trip {
   driver            Driver   @relation(fields: [driver_id], references: [id])
   vehicle           Vehicle  @relation(fields: [vehicle_id], references: [id])
   customer          Customer @relation(fields: [customer_id], references: [id])
+  tenant_id         String
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
   deleted           Boolean  @default(false)
@@ -95,6 +106,7 @@ model Customer {
   phone_number String   @unique
   address      Address? @relation(fields: [address_id], references: [id])
   address_id   String?
+  tenant_id    String
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   deleted      Boolean  @default(false)
@@ -126,6 +138,7 @@ model Driver {
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
   deleted              Boolean   @default(false)
+  tenant_id            String
   address_id           String
   Trip                 Trip[]
 }
@@ -152,20 +165,22 @@ model Expense {
   amount      Float
   type        String
   date        DateTime
+  tenant_id   String
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   deleted     Boolean  @default(false)
 }
 
 model Invite {
-  id              String   @id @default(uuid())
-  name            String
-  email           String
-  role            Role
-  code            Int
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  deleted         Boolean  @default(false)
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  role       Role
+  code       Int
+  tenant_id  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted    Boolean  @default(false)
 }
 
 enum Role {

@@ -5,7 +5,70 @@ import { BadRequestException } from "../exceptions/bad-request";
 import { ErrorCode } from "../exceptions/root.exception";
 import { NotFoundException } from "../exceptions/not-found";
 import { UnauthorizedException } from "../exceptions/unauthorized";
-import { read, write } from "fs";
+
+export const adminSignUp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { name, email, password, secret } = req.body;
+  let existingUser = await prismaClient.user.findFirst({
+    where: { email: email },
+  });
+
+  if(secret !== process.env.ADMIN_USER_SECRET){
+    return res.status(409).json({ message: "Invalid secret" });
+  }
+
+  if (existingUser) {
+    return res.status(409).json({ message: "User already exists" });
+  }
+
+  const tenant = await prismaClient.tenant.create({
+    data: {
+      admin_name : name,
+      admin_email : email,
+    },
+  });
+
+  const permissions = getPermissions("ADMIN");
+
+  const user = await prismaClient.user.create({
+    data: {
+      email,
+      name,
+      password,
+      role: "ADMIN",
+      permissions: permissions,
+      tenant_id: tenant.id,
+    },
+  });
+
+  const accessToken = jwt.sign(
+    {
+      userId: user.id,
+      tenantId: tenant.id,
+    },
+    process.env.ACCESS_TOKEN_SECRET!,
+    { expiresIn: '7d' }
+  );
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+  });
+  res.json({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    tenantId: user.tenant_id,
+    permissions: user.permissions,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  });
+}
 
 export const signUp = async (
   req: Request,
@@ -43,14 +106,16 @@ export const signUp = async (
       password,
       role: invite.role,
       permissions: permissions,
+      tenant_id: invite.tenant_id,
     },
   });
   const accessToken = jwt.sign(
     {
       userId: user.id,
+      tenantId: invite.tenant_id,
     },
     process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    { expiresIn: '7d' }
   );
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -89,9 +154,10 @@ export const login = async (
   const accessToken = jwt.sign(
     {
       userId: user.id,
+      tenantId: user.tenant_id,
     },
     process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    { expiresIn: '7d' }
   );
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -103,6 +169,7 @@ export const login = async (
     name: user.name,
     email: user.email,
     role: user.role,
+    tenantId: user.tenant_id,
     permissions: user.permissions,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -152,7 +219,6 @@ export const updateAccess = async (
       permissions: getPermissions(req.body.role),
     },
   });
-  console.log(updatedUser);
   res.status(200).json({ message: "User's permission updated!" });
 };
 
@@ -184,8 +250,10 @@ export const allUsers = async (
   res: Response,
   next: NextFunction
 ) => {
+  const tenantId = req.tenantId;
   const users = await prismaClient.user.findMany({
     where: {
+      tenant_id: tenantId,
       role: {
         in: ["VIEWER", "EDITOR"],
       },
@@ -203,7 +271,15 @@ export const allUsers = async (
   res.json(users);
 };
 
-
+export const getAlltenants = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const tenants = await prismaClient.tenant.findMany({
+  });
+  res.json(tenants);
+};
 
 const getPermissions = (role : "ADMIN" | "EDITOR" | "VIEWER")  => {
   let permission = {

@@ -1,41 +1,5 @@
 import prismaClient from "../db/db.config";
 
-export async function initializeAdminUser() {
-  try {
-    const adminEmail = "admin@gmail.com";
-    const adminPassword = "password";
-
-    const existingAdmin = await prismaClient.user.findFirst({
-      where: { role: "ADMIN" },
-    });
-
-    if (!existingAdmin) {
-      console.log("No admin user found. Creating default admin...");
-
-      await prismaClient.user.create({
-        data: {
-          name: "admin",
-          email: adminEmail,
-          password: adminPassword,
-          role: "ADMIN", // Admin role
-          permissions: {
-            vehicle: { read: true, write: true },
-            trip: { read: true, write: true },
-            customer: { read: true, write: true },
-            driver: { read: true, write: true },
-          },
-        },
-      });
-
-      console.log(`Admin user created with email: ${adminEmail}`);
-    } else {
-      console.log("Admin user already exists. Skipping initialization.");
-    }
-  } catch (error) {
-    console.error("Error during admin initialization:", error);
-  }
-}
-
 function getRandomDateWithinMonth() {
   const today = new Date();
   const end = new Date();
@@ -81,6 +45,7 @@ export async function addInitialVehicles() {
         next_service_due: getRandomDateWithinMonth(),
         next_service_due_kms: 55000,
         gps_renewal_due: getRandomDateWithinMonth(),
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908'
       },
       {
         asset_no: 102,
@@ -115,6 +80,7 @@ export async function addInitialVehicles() {
         next_service_due: getRandomDateWithinMonth(),
         next_service_due_kms: 35000,
         gps_renewal_due: getRandomDateWithinMonth(),
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908'
       },
     ];
 
@@ -181,6 +147,7 @@ export async function addCustomerAndDriver() {
         email: "johndoe@example.com",
         phone_number: "9876543210",
         address_id: addresses[0].id,
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908'
       },
       {
         prefix: "Ms.",
@@ -188,6 +155,7 @@ export async function addCustomerAndDriver() {
         email: "janesmith@example.com",
         phone_number: "8765432109",
         address_id: addresses[1].id,
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908'
       },
     ];
 
@@ -221,6 +189,7 @@ export async function addCustomerAndDriver() {
         working_region: "North",
         working_state: "Delhi",
         working_city: "New Delhi",
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908',
         document_url:
           "14dda106-0108-46e7-9cf1-b86e58c4f484_Abhishek_resume_2.pdf",
       },
@@ -242,6 +211,7 @@ export async function addCustomerAndDriver() {
         working_region: "West",
         working_state: "Maharashtra",
         working_city: "Mumbai",
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908',
         document_url:
           "14dda106-0108-46e7-9cf1-b86e58c4f484_Abhishek_resume_2.pdf",
       },
@@ -292,6 +262,7 @@ export async function addTrips() {
         permit: 200,
         maintainance: 1000,
         profit: 3000,
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908'
       },
       {
         trip_type: "Local",
@@ -315,6 +286,7 @@ export async function addTrips() {
         permit: 150,
         maintainance: 800,
         profit: 2000,
+        tenant_id: '75a0e693-1fe9-49e6-b8ad-76a6a8a46908'
       },
     ];
 

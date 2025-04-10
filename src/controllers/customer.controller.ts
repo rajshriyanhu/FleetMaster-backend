@@ -31,6 +31,7 @@ export const createCustomer = async (
       email,
       phone_number,
       address_id: address.id,
+      tenant_id: req.tenantId,
     },
   });
   res.status(201).json({ success: true, customer: newCustomer });
@@ -50,6 +51,7 @@ export const getAllCustomers = async (
   const [customers, total] = await Promise.all([
     prismaClient.customer.findMany({
       where: {
+        tenant_id: req.tenantId,
         deleted: false,
         OR: [
           { name: { contains: searchQuery} },
@@ -69,6 +71,7 @@ export const getAllCustomers = async (
     prismaClient.customer.count({
       where: {
         deleted: false,
+        tenant_id: req.tenantId,
         OR: [
           { name: { contains: searchQuery } },
           { email: { contains: searchQuery} },
@@ -204,7 +207,7 @@ export const findCustomer = async (
 ) => {
   const phoneNumber = req.params.phone;
   const customer = await prismaClient.customer.findFirst({
-    where: { phone_number: phoneNumber },
+    where: { phone_number: phoneNumber, tenant_id: req.tenantId },
   });
 
   if (!customer || customer.deleted) {

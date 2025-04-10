@@ -59,6 +59,7 @@ export const createDriver = async (
       experience,
       expertise,
       address_id: address.id,
+      tenant_id: req.tenantId,
     },
   });
   res.status(201).json({ success: true, driver: newDriver });
@@ -78,6 +79,7 @@ export const getAllDriver = async (
   const [drivers, total] = await Promise.all([
     prismaClient.driver.findMany({
       where: {
+        tenant_id: req.tenantId,
         deleted: false,
         OR: [
           { name: { contains: searchQuery } },
@@ -192,7 +194,7 @@ export const updateDriver = async (
       postal_code,
     },
   });
-  const updatedCustomer = await prismaClient.driver.update({
+  const updatedDriver = await prismaClient.driver.update({
     where: { id: driverId },
     data: {
       name,
@@ -203,7 +205,7 @@ export const updateDriver = async (
       expertise,
     },
   });
-  res.status(200).json({ success: true, customer: updatedCustomer });
+  res.status(200).json({ success: true, customer: updatedDriver });
 };
 
 export const deleteDriver = async (

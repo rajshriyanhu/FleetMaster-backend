@@ -11,8 +11,11 @@ export const getDashboardTrips = async (
     const oneMonthBack = subMonths(today, 1);
     const oneMonthForward = addMonths(today, 1);
 
+    console.log("tenantId", req.tenantId);
+
     const trips = await prismaClient.trip.findMany({
       where: {
+        tenant_id: req.tenantId,
         start_date: {
           gte: oneMonthBack,
           lte: oneMonthForward,
@@ -37,6 +40,7 @@ export const getDashboardTrips = async (
   
     const vehicles = await prismaClient.vehicle.findMany({
       where: {
+        tenant_id: req.tenantId,
         deleted: false,
         OR: [
           { insurance_validity: { gte: today, lte: oneMonthFromNow } },

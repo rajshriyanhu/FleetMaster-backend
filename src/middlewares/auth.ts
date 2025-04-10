@@ -5,6 +5,7 @@ import * as jwt from "jsonwebtoken";
 
 interface JwtPayload {
   userId: string;
+  tenantId: string;
 }
 
 export const authMiddleware = async (
@@ -29,6 +30,7 @@ export const authMiddleware = async (
       );
     }
     req.userId = payload.userId;
+    req.tenantId = payload.tenantId;
     next();
   } catch (error) {
     return next(

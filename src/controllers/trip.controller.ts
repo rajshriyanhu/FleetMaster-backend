@@ -8,7 +8,7 @@ export const createtrip = async (
 ) => {
   const [newTrip] = await prismaClient.$transaction([
     prismaClient.trip.create({
-      data: req.body,
+      data: {...req.body, tenant_id: req.tenantId},
     }),
     prismaClient.vehicle.update({
       where: { id: req.body.vehicle_id },
@@ -36,6 +36,7 @@ export const getAllTrips = async (
   const [trips, total] = await Promise.all([
     prismaClient.trip.findMany({
       where: {
+        tenant_id: req.tenantId,
         deleted: false,
         OR: [
           { start_location: { contains: searchQuery } },

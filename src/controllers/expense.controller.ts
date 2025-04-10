@@ -7,7 +7,7 @@ export const createExpense = async (
   next: NextFunction
 ) => {
   const newExpense = await prismaClient.expense.create({
-    data: req.body,
+    data: {...req.body, tenant_id: req.tenantId},
   });
   res.status(201).json({ success: true, expense: newExpense });
 };
@@ -20,8 +20,9 @@ export const getAllExpenses = async (
   const vehicleId = req.params.id;
   const expenses = await prismaClient.expense.findMany({
     where: {
-      vehicle_id: vehicleId,
-      deleted: false,
+        vehicle_id: vehicleId,
+        tenant_id: req.tenantId,
+        deleted: false,
     },
   });
   res.status(200).json({ success: true, expenses: expenses });

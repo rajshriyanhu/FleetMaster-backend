@@ -17,6 +17,7 @@ export const inviteUser = async (
       email,
       role,
       code: otp,
+      tenant_id: req.tenantId
     },
   });
 
@@ -71,6 +72,7 @@ export const getAllInvites = async (
 ) => {
   await prismaClient.invite.deleteMany({
     where: {
+      tenant_id: req.tenantId,
       created_at: {
         lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       }

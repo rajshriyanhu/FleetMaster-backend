@@ -1,4 +1,4 @@
-import {RequestHandler, Router} from 'express'
+import { Router} from 'express'
 import { authMiddleware } from '../middlewares/auth'
 import { errorHandler } from '../utils/errorHandler'
 import { cancelInvite, getAllInvites, inviteUser, resendInvite } from '../controllers/invite.controller'

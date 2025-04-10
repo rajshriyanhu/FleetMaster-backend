@@ -7,7 +7,7 @@ export const createVehicleEntry = async (
   next: NextFunction
 ) => {
   const newVehicle = await prismaClient.vehicle.create({
-    data: req.body,
+    data: {...req.body, tenant_id: req.tenantId},
   });
   res.status(201).json({ success: true, vehicle: newVehicle });
 };
@@ -21,10 +21,11 @@ export const getAllVehicles = async (
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
   const searchQuery = (req.query.search as string) || "";
-
+  console.log("tenantId : ",req.tenantId)
   const [vehicles, total] = await Promise.all([
     prismaClient.vehicle.findMany({
       where: {
+        tenant_id: req.tenantId,
         deleted: false,
         OR: [
           { registration_no: { contains: searchQuery } },
@@ -35,6 +36,7 @@ export const getAllVehicles = async (
     }),
     prismaClient.vehicle.count({
       where: {
+        tenant_id: req.tenantId,
         deleted: false,
         OR: [
           { registration_no: { contains: searchQuery } },
