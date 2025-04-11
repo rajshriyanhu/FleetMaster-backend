@@ -265,7 +265,7 @@ export const allUsers = async (
   const tenantId = req.tenantId;
   const users = await prismaClient.user.findMany({
     where: {
-      // tenant_id: tenantId,
+      tenant_id: tenantId,
       // role: {
       //   in: ["VIEWER", "EDITOR"],
       // },
