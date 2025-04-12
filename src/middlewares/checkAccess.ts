@@ -29,8 +29,10 @@ export const checkAccess = (packageName: Resource, action: Action) => {
         }
         const permissions: Permission = user.permissions as unknown as Permission;
 
+        console.log(permissions)
+
         if (!permissions || !permissions[packageName]?.[action]) {
-        return res.status(403).json({ message: "Access denied" });
+        return res.status(409).json({ message: "Access denied" });
       }
         next();
         } catch (error) {

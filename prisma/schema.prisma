@@ -187,4 +187,5 @@ enum Role {
   ADMIN
   VIEWER
   EDITOR
+  CREATOR
 }

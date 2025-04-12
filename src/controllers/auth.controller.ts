@@ -7,6 +7,7 @@ import { NotFoundException } from "../exceptions/not-found";
 import { UnauthorizedException } from "../exceptions/unauthorized";
 import { sendEmail } from "../utils/mailer";
 import * as bcrypt from "bcrypt";
+import { getPermissions } from "../utils/permissions";
 
 export const adminSignUp = async (
   req: Request,
@@ -266,9 +267,6 @@ export const allUsers = async (
   const users = await prismaClient.user.findMany({
     where: {
       tenant_id: tenantId,
-      // role: {
-      //   in: ["VIEWER", "EDITOR"],
-      // },
     },
     select: {
       id: true,
@@ -281,7 +279,8 @@ export const allUsers = async (
       updatedAt: true,
     },
   });
-  res.json(users);
+
+  res.json(users.filter((item) => item.id !== req.userId));
 };
 
 export const getAlltenants = async (
@@ -354,127 +353,4 @@ export const sendCode = async (
   res.status(201).json({ message: "Invite sent successfully" });
 };
 
-const getPermissions = (role: "ADMIN" | "EDITOR" | "VIEWER") => {
-  let permission = {
-    vehicle: {
-      read: true,
-      write: true,
-      update: false,
-      delete: false,
-    },
-    trip: {
-      read: true,
-      write: true,
-      update: false,
-      delete: false,
-    },
-    driver: {
-      read: true,
-      write: true,
-      update: false,
-      delete: false,
-    },
-    constomer: {
-      read: true,
-      write: true,
-      update: false,
-      delete: false,
-    },
-    expense: {
-      read: true,
-      write: true,
-      update: false,
-      delete: false,
-    },
-    user: {
-      read: false,
-      write: false,
-      update: false,
-      delete: false,
-    },
-  };
 
-  if (role === "ADMIN") {
-    permission = {
-      vehicle: {
-        read: true,
-        write: true,
-        update: true,
-        delete: true,
-      },
-      trip: {
-        read: true,
-        write: true,
-        update: true,
-        delete: true,
-      },
-      driver: {
-        read: true,
-        write: true,
-        update: true,
-        delete: true,
-      },
-      constomer: {
-        read: true,
-        write: true,
-        update: true,
-        delete: true,
-      },
-      expense: {
-        read: true,
-        write: true,
-        update: true,
-        delete: true,
-      },
-      user: {
-        read: true,
-        write: true,
-        update: true,
-        delete: true,
-      },
-    };
-  }
-
-  if (role === "EDITOR") {
-    permission = {
-      vehicle: {
-        read: true,
-        write: true,
-        update: true,
-        delete: false,
-      },
-      trip: {
-        read: true,
-        write: true,
-        update: true,
-        delete: false,
-      },
-      driver: {
-        read: true,
-        write: true,
-        update: true,
-        delete: false,
-      },
-      constomer: {
-        read: true,
-        write: true,
-        update: true,
-        delete: false,
-      },
-      expense: {
-        read: true,
-        write: true,
-        update: true,
-        delete: false,
-      },
-      user: {
-        read: false,
-        write: false,
-        update: true,
-        delete: false,
-      },
-    };
-  }
-
-  return permission;
-};
