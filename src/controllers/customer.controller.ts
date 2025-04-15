@@ -128,6 +128,7 @@ export const updateCustomer = async (
 ) => {
   const customerId = req.params.id;
   const {
+    prefix,
     name,
     email,
     phone_number,
@@ -166,6 +167,7 @@ export const updateCustomer = async (
   const updatedCustomer = await prismaClient.customer.update({
     where: { id: customerId },
     data: {
+      prefix,
       name,
       email,
       phone_number,

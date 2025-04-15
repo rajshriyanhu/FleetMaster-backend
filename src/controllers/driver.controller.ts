@@ -155,6 +155,17 @@ export const updateDriver = async (
 ) => {
   const driverId = req.params.id;
   const {
+    alt_phone_number,
+    emg_name,
+    emg_relation,
+    emg_phone_number,
+    employment_status,
+    working_region,
+    working_state,
+    working_city,
+    insurance_valid_upto,
+    joining_date,
+    exit_date,
     name,
     email,
     phone_number,
@@ -164,7 +175,6 @@ export const updateDriver = async (
     street,
     city,
     state,
-    country,
     postal_code,
   } = req.body;
   const driver = await prismaClient.driver.findFirst({
@@ -203,6 +213,17 @@ export const updateDriver = async (
       dl_number,
       experience,
       expertise,
+      alt_phone_number,
+      emg_name,
+      emg_relation,
+      emg_phone_number,
+      employment_status,
+      working_city,
+      working_region,
+      working_state,
+      insurance_valid_upto,
+      joining_date,
+      exit_date,
     },
   });
   res.status(200).json({ success: true, customer: updatedDriver });
